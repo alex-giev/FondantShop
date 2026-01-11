@@ -1,0 +1,21 @@
+{
+  "name": "fondant-toppers-booth",
+  "version": "1.0.0",
+  "description": "Modern e-commerce website for fondant cake toppers",
+  "main": "backend/static/app.js",
+  "scripts": {
+    "compile-ts": "tsc backend/static/app.ts --outDir backend/static --target ES2015",
+    "watch-ts": "tsc backend/static/app.ts --outDir backend/static --target ES2015 --watch"
+  },
+  "keywords": [
+    "fondant",
+    "cake",
+    "toppers",
+    "ecommerce"
+  ],
+  "author": "Fondant Toppers Booth",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}

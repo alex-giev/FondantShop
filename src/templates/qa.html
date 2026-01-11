@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questions & Answers - Fondant Toppers Booth</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@300;400;500;600;700&family=Amatic+SC:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Enhanced Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='enhanced-style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="/" class="nav-logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Fondant Toppers Booth Logo" onerror="this.style.display='none'">
+        </a>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}" class="nav-link">Home</a>
+            <a href="{{ url_for('products') }}" class="nav-link">Products</a>
+            <a href="{{ url_for('contact') }}" class="nav-link">Contact</a>
+            <a href="{{ url_for('reviews') }}" class="nav-link">Reviews</a>
+            <a href="{{ url_for('qa') }}" class="nav-link">Q & A</a>
+            <a href="{{ url_for('view_cart') }}" class="nav-link">
+                <i class="fas fa-shopping-cart"></i> Cart 
+                <span class="badge bg-danger rounded-pill" id="cart-badge" style="font-size: 0.7em;">0</span>
+            </a>
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('account') }}" class="nav-link"><i class="fas fa-user"></i> Account</a>
+                <a href="{{ url_for('logout') }}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="{{ url_for('register') }}" class="nav-link"><i class="fas fa-user-plus"></i> Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Page Title -->
+    <h1 class="page-title">Frequently Asked Questions</h1>
+    <p class="text-center mb-4" style="font-size: 1.2em; color: #5A5A5A;">
+        <i class="fas fa-question-circle" style="color: #FF69B4;"></i>
+        Find answers to common questions about our fondant toppers
+    </p>
+
+    <!-- FAQ Accordion -->
+    <div class="faq-container">
+        {% if faqs %}
+            {% for faq in faqs %}
+            <div class="faq-item">
+                <div class="faq-question">
+                    {{ faq.question }}
+                </div>
+                <div class="faq-answer">
+                    <p>{{ faq.answer }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="contact-container text-center">
+                <i class="fas fa-book-open fa-4x mb-4" style="color: #FF69B4;"></i>
+                <h3>FAQ Coming Soon</h3>
+                <p>We're working on compiling frequently asked questions. Check back soon!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Still Have Questions Section -->
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="contact-container text-center">
+                    <i class="fas fa-comments fa-3x mb-3" style="color: #AEE8E6;"></i>
+                    <h2 class="page-title" style="font-size: 2.5em;">Still Have Questions?</h2>
+                    <p style="font-size: 1.2em; color: #5A5A5A;">
+                        Can't find what you're looking for? We're here to help! Send us a message and we'll get back to you as soon as possible.
+                    </p>
+                    <a href="{{ url_for('contact') }}" class="btn btn-primary btn-lg mt-3 pulse">
+                        <i class="fas fa-envelope"></i> Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Tips Section -->
+    <div class="container my-5">
+        <h2 class="page-title">Helpful Tips</h2>
+        <div class="row mt-4">
+            <div class="col-md-6 mb-4">
+                <div class="contact-container">
+                    <h4 style="color: #FF69B4;">
+                        <i class="fas fa-lightbulb"></i> Storage Tips
+                    </h4>
+                    <ul style="text-align: left; color: #5A5A5A; line-height: 1.8;">
+                        <li>Keep toppers in a cool, dry place away from direct sunlight</li>
+                        <li>Store in an airtight container to prevent humidity damage</li>
+                        <li>Avoid refrigeration as condensation can affect the fondant</li>
+                        <li>Handle with clean, dry hands to prevent fingerprints</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="contact-container">
+                    <h4 style="color: #AEE8E6;">
+                        <i class="fas fa-magic"></i> Placement Tips
+                    </h4>
+                    <ul style="text-align: left; color: #5A5A5A; line-height: 1.8;">
+                        <li>Place toppers on your cake just before serving for best appearance</li>
+                        <li>Use a dab of frosting as "glue" to secure toppers</li>
+                        <li>Arrange toppers on a smooth, frosted surface</li>
+                        <li>Keep toppers away from candles and open flames</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Navigation -->
+    <div class="container my-5">
+        <div class="contact-container">
+            <h3 class="text-center mb-4" style="color: #FF69B4;">Explore More</h3>
+            <div class="row text-center">
+                <div class="col-md-3 col-6 mb-3">
+                    <a href="{{ url_for('products') }}" class="btn btn-secondary w-100">
+                        <i class="fas fa-cubes"></i><br>Products
+                    </a>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <a href="{{ url_for('reviews') }}" class="btn btn-secondary w-100">
+                        <i class="fas fa-star"></i><br>Reviews
+                    </a>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <a href="{{ url_for('contact') }}" class="btn btn-secondary w-100">
+                        <i class="fas fa-envelope"></i><br>Contact
+                    </a>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <a href="{{ url_for('home') }}" class="btn btn-secondary w-100">
+                        <i class="fas fa-home"></i><br>Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p><strong>Fondant Toppers Booth</strong></p>
+            <p>Making your celebrations extra special, one topper at a time!</p>
+            <p>
+                <a href="mailto:contact@fondanttoppersbooth.com" style="color: #FF69B4; text-decoration: none;">
+                    <i class="fas fa-envelope"></i> contact@fondanttoppersbooth.com
+                </a>
+            </p>
+            <div class="social-links">
+                <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="social-link" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+                <a href="#" class="social-link" aria-label="Etsy"><i class="fab fa-etsy"></i></a>
+            </div>
+            <p class="mt-3">&copy; 2026 Fondant Toppers Booth. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

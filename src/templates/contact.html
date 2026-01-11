@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Fondant Toppers Booth</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@300;400;500;600;700&family=Amatic+SC:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='enhanced-style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <a href="/" class="nav-logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Fondant Toppers Booth Logo" onerror="this.style.display='none'">
+        </a>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}" class="nav-link">Home</a>
+            <a href="{{ url_for('products') }}" class="nav-link">Products</a>
+            <a href="{{ url_for('contact') }}" class="nav-link">Contact</a>
+            <a href="{{ url_for('reviews') }}" class="nav-link">Reviews</a>
+            <a href="{{ url_for('qa') }}" class="nav-link">Q & A</a>
+            <a href="{{ url_for('view_cart') }}" class="nav-link">
+                <i class="fas fa-shopping-cart"></i> Cart 
+                <span class="badge bg-danger rounded-pill" id="cart-badge" style="font-size: 0.7em;">0</span>
+            </a>
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('account') }}" class="nav-link"><i class="fas fa-user"></i> Account</a>
+                <a href="{{ url_for('logout') }}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="{{ url_for('register') }}" class="nav-link"><i class="fas fa-user-plus"></i> Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Page Title -->
+    <h1 class="page-title">Get in Touch</h1>
+    <p class="text-center mb-4" style="font-size: 1.2em; color: #5A5A5A;">
+        We'd love to hear from you! Have questions or custom requests? Send us a message!
+    </p>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Contact Form -->
+    <div class="contact-container">
+        <form method="POST" action="{{ url_for('contact_submit') }}" id="contactForm">
+            <div class="form-group">
+                <label for="name">
+                    <i class="fas fa-user"></i> Your Name *
+                </label>
+                <input type="text" id="name" name="name" class="form-control" required placeholder="Enter your full name">
+            </div>
+
+            <div class="form-group">
+                <label for="email">
+                    <i class="fas fa-envelope"></i> Email Address *
+                </label>
+                <input type="email" id="email" name="email" class="form-control" required placeholder="your.email@example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="subject">
+                    <i class="fas fa-tag"></i> Subject *
+                </label>
+                <input type="text" id="subject" name="subject" class="form-control" required placeholder="What's this about?">
+            </div>
+
+            <div class="form-group">
+                <label for="message">
+                    <i class="fas fa-comment-dots"></i> Message *
+                </label>
+                <textarea id="message" name="message" class="form-control" required placeholder="Tell us more about your inquiry or custom order request..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 btn-lg">
+                <i class="fas fa-paper-plane"></i> Send Message
+            </button>
+        </form>
+
+        <!-- Contact Info -->
+        <div class="mt-5 text-center">
+            <h3 class="mb-4" style="color: #FF69B4;">Other Ways to Reach Us</h3>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="float">
+                        <i class="fas fa-envelope fa-2x mb-2" style="color: #FF69B4;"></i>
+                        <p><strong>Email</strong></p>
+                        <p><a href="mailto:contact@fondanttoppersbooth.com" style="color: #5A5A5A; text-decoration: none;">contact@fondanttoppersbooth.com</a></p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="float" style="animation-delay: 0.2s;">
+                        <i class="fab fa-etsy fa-2x mb-2" style="color: #AEE8E6;"></i>
+                        <p><strong>Etsy Shop</strong></p>
+                        <p><a href="https://www.etsy.com/shop/FondantToppersBooth" target="_blank" style="color: #5A5A5A; text-decoration: none;">Visit Our Store</a></p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="float" style="animation-delay: 0.4s;">
+                        <i class="fab fa-instagram fa-2x mb-2" style="color: #FF69B4;"></i>
+                        <p><strong>Instagram</strong></p>
+                        <p><a href="#" target="_blank" style="color: #5A5A5A; text-decoration: none;">@fondanttoppersbooth</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Quick Link -->
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="contact-container text-center" style="background: linear-gradient(135deg, rgba(255, 221, 225, 0.5), rgba(174, 232, 230, 0.5));">
+                    <i class="fas fa-question-circle fa-3x mb-3" style="color: #FF69B4;"></i>
+                    <h3>Looking for Quick Answers?</h3>
+                    <p>Check out our FAQ page for answers to common questions about orders, shipping, and custom requests.</p>
+                    <a href="{{ url_for('qa') }}" class="btn btn-secondary mt-3">
+                        <i class="fas fa-book-open"></i> View FAQ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p><strong>Fondant Toppers Booth</strong></p>
+            <p>Making your celebrations extra special, one topper at a time!</p>
+            <p>
+                <a href="mailto:contact@fondanttoppersbooth.com" style="color: #FF69B4; text-decoration: none;">
+                    <i class="fas fa-envelope"></i> contact@fondanttoppersbooth.com
+                </a>
+            </p>
+            <div class="social-links">
+                <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="social-link" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+                <a href="#" class="social-link" aria-label="Etsy"><i class="fab fa-etsy"></i></a>
+            </div>
+            <p class="mt-3">&copy; 2026 Fondant Toppers Booth. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

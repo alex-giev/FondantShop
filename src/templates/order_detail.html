@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - Fondant Toppers Booth</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@300;400;500;600;700&family=Amatic+SC:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='enhanced-style.css') }}">
+    
+    <style>
+        .order-success-banner {
+            background: linear-gradient(135deg, #FF69B4 0%, #FFB6C1 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+            margin-bottom: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(255, 105, 180, 0.3);
+        }
+        
+        .order-success-banner i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: bounce 1s ease infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .order-detail-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .order-detail-card h3 {
+            color: #FF69B4;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #FFB6C1;
+            padding-bottom: 10px;
+        }
+        
+        .order-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .order-info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .order-info-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .order-info-value {
+            color: #333;
+        }
+        
+        .order-status {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+        
+        .order-status.completed {
+            background: #D4EDDA;
+            color: #155724;
+        }
+        
+        .order-status.pending {
+            background: #FFF3CD;
+            color: #856404;
+        }
+        
+        .order-total {
+            font-size: 2em;
+            color: #FF69B4;
+            font-weight: bold;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: 30px;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -32px;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #FF69B4;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #FF69B4;
+        }
+        
+        .timeline-item:after {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: 16px;
+            width: 2px;
+            height: 100%;
+            background: #FFB6C1;
+        }
+        
+        .timeline-item:last-child:after {
+            display: none;
+        }
+        
+        .timeline-date {
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-desc {
+            color: #666;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Fondant Toppers Booth Logo" style="height: 50px; margin-right: 10px;">
+            Fondant Toppers Booth
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}" class="nav-link">Home</a>
+            <a href="{{ url_for('products') }}" class="nav-link">Products</a>
+            <a href="{{ url_for('contact') }}" class="nav-link">Contact</a>
+            <a href="{{ url_for('reviews') }}" class="nav-link">Reviews</a>
+            <a href="{{ url_for('qa') }}" class="nav-link">Q & A</a>
+            {% if session.get('user_id') %}
+                <a href="{{ url_for('account') }}" class="nav-link"><i class="fas fa-user"></i> Account</a>
+                <a href="{{ url_for('logout') }}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="{{ url_for('register') }}" class="nav-link"><i class="fas fa-user-plus"></i> Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 50px 0;">
+        <!-- Success Banner -->
+        <div class="order-success-banner">
+            <i class="fas fa-check-circle"></i>
+            <h1 style="font-family: 'Pacifico', cursive; margin-bottom: 15px;">Order Confirmed!</h1>
+            <p style="font-size: 1.2em;">Thank you for your purchase, {{ order['first_name'] }}!</p>
+            <p>Your order has been successfully placed and will be processed soon.</p>
+        </div>
+
+        <div class="row">
+            <!-- Order Details -->
+            <div class="col-lg-8">
+                <div class="order-detail-card">
+                    <h3><i class="fas fa-shopping-bag"></i> Order Information</h3>
+                    
+                    <div class="order-info-row">
+                        <span class="order-info-label">Order Number:</span>
+                        <span class="order-info-value">#{{ order['id'] }}</span>
+                    </div>
+                    
+                    <div class="order-info-row">
+                        <span class="order-info-label">Product:</span>
+                        <span class="order-info-value">{{ order['product_name'] }}</span>
+                    </div>
+                    
+                    <div class="order-info-row">
+                        <span class="order-info-label">Order Date:</span>
+                        <span class="order-info-value">{{ order['created_at'] }}</span>
+                    </div>
+                    
+                    <div class="order-info-row">
+                        <span class="order-info-label">Status:</span>
+                        <span class="order-info-value">
+                            <span class="order-status {{ order['status'] }}">{{ order['status'] }}</span>
+                        </span>
+                    </div>
+                    
+                    <div class="order-info-row">
+                        <span class="order-info-label">Total Amount:</span>
+                        <span class="order-total">${{ order['product_price'] }}</span>
+                    </div>
+                </div>
+
+                <!-- Order Timeline -->
+                <div class="order-detail-card">
+                    <h3><i class="fas fa-clock"></i> Order Timeline</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-date">{{ order['created_at'] }}</div>
+                            <div class="timeline-title">Order Placed</div>
+                            <div class="timeline-desc">Your order has been received and confirmed.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">Estimated: 1-2 business days</div>
+                            <div class="timeline-title">Processing</div>
+                            <div class="timeline-desc">We're carefully crafting your fondant topper.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">Estimated: 3-5 business days</div>
+                            <div class="timeline-title">Shipped</div>
+                            <div class="timeline-desc">Your order will be carefully packaged and shipped.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">Estimated: 5-7 business days</div>
+                            <div class="timeline-title">Delivered</div>
+                            <div class="timeline-desc">Your fondant topper arrives at your doorstep!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Customer Info -->
+                <div class="order-detail-card">
+                    <h3><i class="fas fa-user"></i> Customer</h3>
+                    <p style="margin-bottom: 5px;"><strong>{{ order['first_name'] }} {{ order['last_name'] }}</strong></p>
+                    <p style="color: #666;"><i class="fas fa-envelope"></i> {{ order['email'] }}</p>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="order-detail-card">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                    <a href="{{ url_for('account') }}" class="btn btn-primary w-100 mb-2">
+                        <i class="fas fa-list"></i> View All Orders
+                    </a>
+                    <a href="{{ url_for('products') }}" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="fas fa-shopping-bag"></i> Continue Shopping
+                    </a>
+                    <a href="{{ url_for('contact') }}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-question-circle"></i> Contact Support
+                    </a>
+                </div>
+
+                <!-- What's Next -->
+                <div class="order-detail-card">
+                    <h3><i class="fas fa-info-circle"></i> What's Next?</h3>
+                    <ul style="padding-left: 20px; color: #666; line-height: 1.8;">
+                        <li>You'll receive an email confirmation shortly</li>
+                        <li>We'll notify you when your order ships</li>
+                        <li>Track your order from your account dashboard</li>
+                        <li>Contact us anytime with questions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p><strong>Fondant Toppers Booth</strong></p>
+            <p>Making your celebrations extra special, one topper at a time!</p>
+            <p>
+                <a href="mailto:contact@fondanttoppersbooth.com" style="color: #FF69B4; text-decoration: none;">
+                    <i class="fas fa-envelope"></i> contact@fondanttoppersbooth.com
+                </a>
+            </p>
+            <div class="social-links">
+                <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="social-link" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+                <a href="#" class="social-link" aria-label="Etsy"><i class="fab fa-etsy"></i></a>
+            </div>
+            <p class="mt-3">&copy; 2026 Fondant Toppers Booth. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

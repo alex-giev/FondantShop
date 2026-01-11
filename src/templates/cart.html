@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Fondant Toppers Booth</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@300;400;500;600;700&family=Amatic+SC:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='enhanced-style.css') }}">
+    
+    <!-- Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <style>
+        .cart-container {
+            padding: 60px 0;
+        }
+    </style>
+</head>
+<body>
+            min-height: 80vh;
+        }
+        
+        .cart-header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .cart-header h1 {
+            color: #FF69B4;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .cart-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .cart-item-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        
+        .cart-item-details {
+            flex: 1;
+        }
+        
+        .cart-item-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .cart-item-variant {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 5px;
+        }
+        
+        .cart-item-price {
+            font-size: 1.2em;
+            color: #FF69B4;
+            font-weight: 600;
+        }
+        
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quantity-btn {
+            width: 35px;
+            height: 35px;
+            border: 2px solid #FF69B4;
+            background: white;
+            color: #FF69B4;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quantity-btn:hover {
+            background: #FF69B4;
+            color: white;
+        }
+        
+        .quantity-input {
+            width: 60px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 5px;
+            font-weight: 600;
+        }
+        
+        .remove-btn {
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 1.3em;
+            transition: transform 0.2s;
+        }
+        
+        .remove-btn:hover {
+            transform: scale(1.2);
+        }
+        
+        .cart-summary {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            position: sticky;
+            top: 100px;
+        }
+        
+        .cart-summary h3 {
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .summary-row.total {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #FF69B4;
+            border-bottom: none;
+            margin-top: 10px;
+        }
+        
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,105,180,0.4);
+        }
+        
+        .checkout-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        
+        .empty-cart i {
+            font-size: 100px;
+            color: #ddd;
+            margin-bottom: 30px;
+        }
+        
+        .empty-cart h2 {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .continue-shopping {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #FF69B4;
+            color: white;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .continue-shopping:hover {
+            background: #FF1493;
+            color: white;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" height="50">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/products">Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/reviews">Reviews</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/qa">Q&A</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/cart">
+                            <i class="fas fa-shopping-cart"></i> Cart 
+                            <span class="badge bg-danger" id="cart-badge">{{ cart|length }}</span>
+                        </a>
+                    </li>
+                    {% if session.user_id %}
+                        <li class="nav-item"><a class="nav-link" href="/account"><i class="fas fa-user"></i> Account</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="/login"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show m-3" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Cart Content -->
+    <div class="cart-container">
+        <div class="container">
+            <div class="cart-header">
+                <h1><i class="fas fa-shopping-cart"></i> Shopping Cart</h1>
+                <p class="text-muted">Review your items before checkout</p>
+            </div>
+
+            {% if cart|length > 0 %}
+                <div class="row">
+                    <div class="col-lg-8">
+                        {% for item in cart %}
+                            <div class="cart-item" data-product-id="{{ item.product_id }}">
+                                <a href="{{ url_for('product_detail', product_id=item.product_id) }}">
+                                    <img src="{{ item.image }}" 
+                                         alt="{{ item.name }}" 
+                                         class="cart-item-image"
+                                         onerror="this.src='https://via.placeholder.com/120x120/FFB6C1/FFFFFF?text=Product'">
+                                </a>
+                                
+                                <div class="cart-item-details">
+                                    <a href="{{ url_for('product_detail', product_id=item.product_id) }}" style="text-decoration: none; color: inherit;">
+                                        <div class="cart-item-name">{{ item.name }}</div>
+                                    </a>
+                                    {% if item.variant %}
+                                        <div class="cart-item-variant">Size: {{ item.variant }}</div>
+                                    {% endif %}
+                                    {% if item.color %}
+                                        <div class="cart-item-variant">Color: {{ item.color }}</div>
+                                    {% endif %}
+                                    <div class="cart-item-price">${{ "%.2f"|format(item.price) }} each</div>
+                                </div>
+                                
+                                <div class="quantity-controls">
+                                    <button class="quantity-btn" onclick="updateQuantity({{ item.product_id }}, -1)">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <input type="number" 
+                                           class="quantity-input" 
+                                           value="{{ item.quantity }}" 
+                                           min="1" 
+                                           onchange="setQuantity({{ item.product_id }}, this.value)">
+                                    <button class="quantity-btn" onclick="updateQuantity({{ item.product_id }}, 1)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="cart-item-price">
+                                    ${{ "%.2f"|format(item.price * item.quantity) }}
+                                </div>
+                                
+                                <i class="fas fa-trash remove-btn" onclick="removeItem({{ item.product_id }})"></i>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="cart-summary">
+                            <h3>Order Summary</h3>
+                            
+                            <div class="summary-row">
+                                <span>Subtotal ({{ cart|sum(attribute='quantity') }} items)</span>
+                                <span id="subtotal">${{ "%.2f"|format(subtotal) }}</span>
+                            </div>
+                            
+                            <div class="summary-row">
+                                <span>Shipping</span>
+                                <span class="text-success">FREE</span>
+                            </div>
+                            
+                            <div class="summary-row total">
+                                <span>Total</span>
+                                <span id="total">${{ "%.2f"|format(subtotal) }}</span>
+                            </div>
+                            
+                            <button class="checkout-btn" id="checkoutBtn" onclick="proceedToCheckout()">
+                                <i class="fas fa-lock"></i> Secure Checkout
+                            </button>
+                            
+                            <div class="text-center mt-3 mb-3">
+                                <small class="text-muted d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-shield-alt me-2"></i>
+                                    Secure payment processing by <strong class="ms-1">Stripe</strong>
+                                </small>
+                            </div>
+                            
+                            <div class="text-center mt-3">
+                                <a href="/products" class="text-muted" style="text-decoration: none;">
+                                    <i class="fas fa-arrow-left"></i> Continue Shopping
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h2>Your cart is empty</h2>
+                    <p class="text-muted mb-4">Add some beautiful fondant toppers to get started!</p>
+                    <a href="/products" class="continue-shopping">
+                        <i class="fas fa-gift"></i> Browse Products
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const stripe = Stripe('{{ stripe_publishable_key }}');
+        
+        function updateQuantity(productId, change) {
+            const input = document.querySelector(`[data-product-id="${productId}"] .quantity-input`);
+            const newValue = Math.max(1, parseInt(input.value) + change);
+            input.value = newValue;
+            setQuantity(productId, newValue);
+        }
+        
+        async function setQuantity(productId, quantity) {
+            try {
+                const response = await fetch('/cart/update', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ product_id: String(productId), quantity: parseInt(quantity) })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    updateCartDisplay(productId, quantity, data.subtotal);
+                } else {
+                    console.error('Failed to update quantity:', data);
+                    alert('Failed to update quantity. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error updating quantity:', error);
+                alert('Error updating quantity. Please try again.');
+            }
+        }
+        
+        function updateCartDisplay(productId, quantity, subtotal) {
+            // Update item total price
+            const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
+            const pricePerItem = parseFloat(cartItem.querySelector('.cart-item-details .cart-item-price').textContent.replace('$', '').replace(' each', ''));
+            const itemTotalPrice = cartItem.querySelector('.cart-item-price:not(.cart-item-details .cart-item-price)');
+            itemTotalPrice.textContent = '$' + (pricePerItem * quantity).toFixed(2);
+            
+            // Update order summary
+            document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+            document.getElementById('total').textContent = '$' + subtotal.toFixed(2);
+            
+            // Update item count in summary
+            const allQuantities = Array.from(document.querySelectorAll('.quantity-input')).map(input => parseInt(input.value));
+            const totalItems = allQuantities.reduce((sum, qty) => sum + qty, 0);
+            document.querySelector('.summary-row span').textContent = `Subtotal (${totalItems} items)`;
+            
+            // Update cart badge
+            updateCartBadge();
+        }
+        
+        async function removeItem(productId) {
+            if (!confirm('Remove this item from cart?')) return;
+            
+            try {
+                const response = await fetch('/cart/remove', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ product_id: String(productId) })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    // Remove item from DOM
+                    const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
+                    cartItem.remove();
+                    
+                    // Update cart badge
+                    updateCartBadge();
+                    
+                    // Check if cart is empty
+                    const remainingItems = document.querySelectorAll('.cart-item');
+                    if (remainingItems.length === 0) {
+                        location.reload(); // Reload to show empty cart message
+                    } else {
+                        // Recalculate totals
+                        const allItems = Array.from(document.querySelectorAll('.cart-item'));
+                        let subtotal = 0;
+                        let totalItems = 0;
+                        
+                        allItems.forEach(item => {
+                            const price = parseFloat(item.querySelector('.cart-item-details .cart-item-price').textContent.replace('$', '').replace(' each', ''));
+                            const quantity = parseInt(item.querySelector('.quantity-input').value);
+                            subtotal += price * quantity;
+                            totalItems += quantity;
+                        });
+                        
+                        document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+                        document.getElementById('total').textContent = '$' + subtotal.toFixed(2);
+                        document.querySelector('.summary-row span').textContent = `Subtotal (${totalItems} items)`;
+                    }
+                } else {
+                    console.error('Failed to remove item:', data);
+                    alert('Failed to remove item. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error removing item:', error);
+                alert('Error removing item. Please try again.');
+            }
+        }
+        
+        async function updateCartBadge() {
+            try {
+                const response = await fetch('/cart/count');
+                const data = await response.json();
+                const badge = document.getElementById('cart-badge');
+                if (badge) {
+                    badge.textContent = data.count;
+                    badge.style.display = data.count > 0 ? 'inline' : 'none';
+                }
+            } catch (error) {
+                console.error('Error updating cart badge:', error);
+            }
+        }
+        
+        async function proceedToCheckout() {
+            const btn = document.getElementById('checkoutBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
+            try {
+                const response = await fetch('/create-checkout-session', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ checkout_type: 'cart' })
+                });
+                
+                if (response.status === 401) {
+                    const data = await response.json();
+                    const loginPrompt = confirm(data.message + '\n\nClick OK to login, or Cancel to create an account.');
+                    if (loginPrompt) {
+                        window.location.href = '/login?redirect=/cart';
+                    } else {
+                        window.location.href = '/register?redirect=/cart';
+                    }
+                    return;
+                }
+                
+                const session = await response.json();
+                
+                if (session.error) {
+                    alert(`Error: ${session.error}`);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-lock"></i> Secure Checkout';
+                } else {
+                    window.location.href = session.url;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-lock"></i> Secure Checkout';
+            }
+        }
+    </script>
+</body>
+</html>
