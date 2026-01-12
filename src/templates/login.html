@@ -138,13 +138,6 @@
             const loginBtn = document.getElementById('login-btn');
             const forgotPasswordLink = document.getElementById('forgot-password-link');
             
-            // Check if already logged in
-            window.firebaseAuthFunctions.onAuthStateChanged((user) => {
-                if (user) {
-                    window.location.href = '/account';
-                }
-            });
-            
             // Handle login
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
