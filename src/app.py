@@ -29,15 +29,21 @@ app.config['SESSION_COOKIE_NAME'] = 'fondant_session'  # Custom session cookie n
 BASE_URL = os.getenv('BASE_URL', 'http://localhost:5000')
 
 # Stripe configuration - strip quotes if present
+print("=== STRIPE CONFIGURATION DEBUG ===")
+print(f"Raw STRIPE_SECRET_KEY from env: {repr(os.getenv('STRIPE_SECRET_KEY', 'NOT_SET'))}")
+print(f"Raw STRIPE_PUBLISHABLE_KEY from env: {repr(os.getenv('STRIPE_PUBLISHABLE_KEY', 'NOT_SET'))}")
+
 stripe_secret = os.getenv('STRIPE_SECRET_KEY', '')
 if stripe_secret:
     # Remove surrounding quotes if present (from .env files)
     stripe_secret = stripe_secret.strip().strip("'").strip('"')
+    print(f"Cleaned STRIPE_SECRET_KEY: {stripe_secret[:30] if len(stripe_secret) > 30 else stripe_secret}...")
 stripe.api_key = stripe_secret if stripe_secret else None
 
 stripe_pub_key = os.getenv('STRIPE_PUBLISHABLE_KEY', 'pk_test_default')
 if stripe_pub_key and stripe_pub_key != 'pk_test_default':
     stripe_pub_key = stripe_pub_key.strip().strip("'").strip('"')
+    print(f"Cleaned STRIPE_PUBLISHABLE_KEY: {stripe_pub_key[:30]}...")
 STRIPE_PUBLISHABLE_KEY = stripe_pub_key
 
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')  # Optional for local testing
@@ -471,7 +477,8 @@ def create_checkout_session():
             total_price = data['price']
         
         # Check if Stripe is configured
-        if not stripe.api_key:
+        if not stripe.api_key or stripe.api_key == '' or stripe.api_key == 'None':
+            print(f"ERROR: Stripe API key is not configured. Current value: {stripe.api_key}")
             return jsonify({
                 'error': 'Stripe not configured',
                 'message': 'Payment processing is not available. Please contact support.'
@@ -480,6 +487,7 @@ def create_checkout_session():
         # Direct redirect to success page (no database needed)
         success_url = f'{BASE_URL}/order-success'
         print(f"Creating Stripe session with success_url: {success_url}")
+        print(f"Using Stripe API key: {stripe.api_key[:20] if stripe.api_key else 'None'}...")
 
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
