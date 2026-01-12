@@ -34,8 +34,16 @@ STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', 'pk_test_default')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')  # Optional for local testing
 
 # Debug: Print to verify keys are loaded
-print(f"Stripe API Key loaded: {stripe.api_key[:20] if stripe.api_key else 'MISSING'}...")
-print(f"Stripe Publishable Key loaded: {STRIPE_PUBLISHABLE_KEY[:20] if STRIPE_PUBLISHABLE_KEY else 'MISSING'}...")
+if not stripe.api_key:
+    print("WARNING: STRIPE_SECRET_KEY not found in environment variables!")
+    print("Stripe payments will not work until this is configured in Vercel.")
+else:
+    print(f"Stripe API Key loaded: {stripe.api_key[:20]}...")
+    
+if not STRIPE_PUBLISHABLE_KEY or STRIPE_PUBLISHABLE_KEY == 'pk_test_default':
+    print("WARNING: STRIPE_PUBLISHABLE_KEY not found in environment variables!")
+else:
+    print(f"Stripe Publishable Key loaded: {STRIPE_PUBLISHABLE_KEY[:20]}...")
 
 # Database configuration
 DATABASE = 'fondant_shop.db'
@@ -452,6 +460,13 @@ def create_checkout_session():
             }]
             order_name = data['name']
             total_price = data['price']
+        
+        # Check if Stripe is configured
+        if not stripe.api_key:
+            return jsonify({
+                'error': 'Stripe not configured',
+                'message': 'Payment processing is not available. Please contact support.'
+            }), 500
         
         # Direct redirect to success page (no database needed)
         success_url = f'{BASE_URL}/order-success'
