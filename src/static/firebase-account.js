@@ -4,6 +4,8 @@
 
     // Wait for Firebase to initialize
     window.addEventListener('load', function() {
+        console.log('Account page loaded, checking Firebase...');
+        
         if (!window.firebaseAuth || !window.firebaseAuthFunctions) {
             console.error('Firebase not initialized');
             window.location.href = '/';
@@ -12,21 +14,31 @@
 
         const auth = window.firebaseAuth;
         const authFunctions = window.firebaseAuthFunctions;
+        
+        console.log('Firebase initialized, checking auth state...');
 
         // Check authentication state
         authFunctions.onAuthStateChanged((user) => {
+            console.log('Auth state changed. User:', user ? user.email : 'null');
+            
             if (user) {
                 // User is logged in
+                console.log('User authenticated:', user.email);
                 displayUserInfo(user);
                 updateNavigation(true, user);
             } else {
                 // User is not logged in, redirect to home after a brief delay
                 // to allow for auth state restoration
+                console.log('No user detected, waiting 1 second before redirect...');
                 setTimeout(() => {
                     const currentUser = auth.currentUser;
+                    console.log('After 1 second, current user:', currentUser ? currentUser.email : 'null');
+                    
                     if (!currentUser) {
+                        console.log('Still no user, redirecting to home...');
                         window.location.href = '/';
                     } else {
+                        console.log('User found after delay:', currentUser.email);
                         displayUserInfo(currentUser);
                         updateNavigation(true, currentUser);
                     }

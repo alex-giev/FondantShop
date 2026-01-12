@@ -807,17 +807,10 @@ def logout():
     return redirect(url_for('home'))
 
 @app.route('/account')
-@login_required
 def account():
-    """User account dashboard"""
-    db = get_db()
-    user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
-    orders = db.execute(
-        'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC',
-        (session['user_id'],)
-    ).fetchall()
-    db.close()
-    return render_template('account.html', user=user, orders=orders)
+    """User account dashboard - authentication handled by Firebase on client side"""
+    # No server-side authentication needed - Firebase handles it in the browser
+    return render_template('account.html')
 
 if __name__ == '__main__':
     app.run(debug=False, host='127.0.0.1', port=5000)
