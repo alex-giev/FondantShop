@@ -23,14 +23,29 @@
         <a href="/" class="nav-logo">
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Fondant Toppers Booth Logo" onerror="this.style.display='none'">
         </a>
-        <div class="nav-links">
+        
+        <!-- Mobile Menu Toggle -->
+        <div class="mobile-menu-toggle" id="mobileMenuToggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        
+        <div class="nav-links" id="navLinks">
             <a href="{{ url_for('home') }}" class="nav-link">Home</a>
             <a href="{{ url_for('products') }}" class="nav-link">Products</a>
             <a href="{{ url_for('contact') }}" class="nav-link">Contact</a>
             <a href="{{ url_for('reviews') }}" class="nav-link">Reviews</a>
             <a href="{{ url_for('qa') }}" class="nav-link">Q & A</a>
-            <a href="{{ url_for('account') }}" class="nav-link" id="account-nav-link"><i class="fas fa-user"></i> Account</a>
-            <button class="nav-link logout-btn" style="background: none; border: none; color: inherit; cursor: pointer;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <a href="{{ url_for('view_cart') }}" class="nav-link">
+                <i class="fas fa-shopping-cart"></i> Cart
+                <span class="badge bg-danger rounded-pill" id="cart-badge">0</span>
+            </a>
+            <!-- Auth links controlled by Firebase - initially hidden to prevent flash -->
+            <a href="/account" class="nav-link" style="display: none;"><i class="fas fa-user"></i> Account</a>
+            <a href="/logout" class="nav-link logout-btn" style="display: none;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <a href="/login" class="nav-link" style="display: none;"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="/register" class="nav-link" style="display: none;"><i class="fas fa-user-plus"></i> Register</a>
         </div>
     </nav>
 
