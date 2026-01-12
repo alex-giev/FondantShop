@@ -620,6 +620,66 @@ def payment_processing(order_id):
     
     return render_template('payment_processing.html', order_id=order_id, token=token)
 
+@app.route('/api/submit-review', methods=['POST'])
+def api_submit_review():
+    """API endpoint to submit a review from logged-in users"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        user_name = data.get('user_name', '').strip()
+        user_email = data.get('user_email', '').strip()
+        rating = data.get('rating')
+        review_text = data.get('review_text', '').strip()
+        
+        if not user_name:
+            return jsonify({'success': False, 'message': 'Name is required'}), 400
+        
+        if not user_email:
+            return jsonify({'success': False, 'message': 'Email is required'}), 400
+        
+        if not rating or not isinstance(rating, int) or rating < 1 or rating > 5:
+            return jsonify({'success': False, 'message': 'Rating must be between 1 and 5'}), 400
+        
+        if not review_text or len(review_text) < 10:
+            return jsonify({'success': False, 'message': 'Review must be at least 10 characters'}), 400
+        
+        # Get database connection
+        db = get_db()
+        
+        # Create reviews table if it doesn't exist
+        db.execute('''
+            CREATE TABLE IF NOT EXISTS reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_name TEXT NOT NULL,
+                user_email TEXT NOT NULL,
+                rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
+                review_text TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                approved BOOLEAN DEFAULT 0
+            )
+        ''')
+        
+        # Insert the review (pending approval)
+        db.execute(
+            'INSERT INTO reviews (user_name, user_email, rating, review_text, approved) VALUES (?, ?, ?, ?, 0)',
+            (user_name, user_email, rating, review_text)
+        )
+        db.commit()
+        db.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Thank you for your review! It will be published after approval.'
+        }), 200
+        
+    except Exception as e:
+        print(f"Error submitting review: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while submitting your review. Please try again.'
+        }), 500
+
 @app.route('/api/order-status/<int:order_id>')
 def api_order_status(order_id):
     """API endpoint to check order status"""
