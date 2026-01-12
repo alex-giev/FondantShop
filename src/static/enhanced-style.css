@@ -66,41 +66,35 @@ html {
     position: sticky;
     top: 0;
     z-index: 1000;
-    will-change: transform;
-    transition: box-shadow 0.2s ease;
-}
-
-.navbar:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .nav-logo img {
     width: 120px;
     height: auto;
     transition: transform 0.2s ease;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-    will-change: transform;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .nav-logo img:hover {
-    transform: scale(1.05);
+    transform: scale(1.03);
 }
 
 .nav-links {
     display: flex;
-    gap: 35px;
+    gap: 30px;
     align-items: center;
 }
 
 .nav-link {
     font-family: 'Amatic SC', cursive;
     color: var(--dark-text);
-    font-size: 1.8em;
+    font-size: 1.7em;
     font-weight: 700;
     text-decoration: none;
     position: relative;
     transition: color 0.2s ease;
-    padding: 5px 0;
+    padding: 8px 0;
+    white-space: nowrap;
 }
 
 .nav-link::after {
@@ -109,10 +103,9 @@ html {
     bottom: 0;
     left: 0;
     width: 0;
-    height: 3px;
+    height: 2px;
     background: var(--accent-pink);
-    transition: width 0.25s ease;
-    border-radius: 2px;
+    transition: width 0.2s ease;
 }
 
 .nav-link:hover {
@@ -128,26 +121,22 @@ html {
     display: none;
     flex-direction: column;
     cursor: pointer;
-    gap: 6px;
-    padding: 8px;
+    gap: 5px;
+    padding: 10px;
     background: transparent;
     border: none;
     z-index: 1002;
-    transition: transform 0.2s ease;
-}
-
-.mobile-menu-toggle:hover {
-    transform: scale(1.05);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .mobile-menu-toggle span {
-    width: 28px;
+    display: block;
+    width: 26px;
     height: 3px;
     background: var(--dark-text);
-    border-radius: 3px;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border-radius: 2px;
+    transition: all 0.3s ease;
     transform-origin: center;
-    will-change: transform, opacity;
 }
 
 /* Enhanced Header with Glowing Text */
@@ -1192,16 +1181,15 @@ footer {
 
 /* Responsive Design - Optimized Mobile Menu */
 .mobile-menu-toggle.active span:nth-child(1) {
-    transform: rotate(45deg) translate(9px, 9px);
+    transform: rotate(45deg) translate(8px, 8px);
 }
 
 .mobile-menu-toggle.active span:nth-child(2) {
     opacity: 0;
-    transform: translateX(-20px);
 }
 
 .mobile-menu-toggle.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(9px, -9px);
+    transform: rotate(-45deg) translate(8px, -8px);
 }
 
 /* Tablet and Mobile Styles */
@@ -1216,6 +1204,7 @@ footer {
     }
     
     .nav-links {
+        display: flex;
         flex-direction: column;
         width: 100%;
         gap: 0;
@@ -1229,17 +1218,12 @@ footer {
         max-height: 0;
         overflow: hidden;
         opacity: 0;
-        transform: translateY(-10px);
-        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                    opacity 0.3s ease,
-                    transform 0.3s ease;
-        will-change: max-height, opacity, transform;
+        transition: max-height 0.35s ease, opacity 0.25s ease;
     }
     
     .nav-links.active {
-        max-height: 600px;
+        max-height: 650px;
         opacity: 1;
-        transform: translateY(0);
     }
     
     .nav-link {
