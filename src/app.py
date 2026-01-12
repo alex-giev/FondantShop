@@ -18,6 +18,16 @@ load_dotenv(env_path)
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'fallback-secret-key-change-in-production')
 
+# Session configuration for production hosting
+app.config['SESSION_COOKIE_SECURE'] = os.getenv('SESSION_COOKIE_SECURE', 'False') == 'True'  # Set to True for HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access to session cookie
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
+app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24 hours in seconds
+app.config['SESSION_COOKIE_NAME'] = 'fondant_session'  # Custom session cookie name
+
+# Base URL configuration (change to your domain in production)
+BASE_URL = os.getenv('BASE_URL', 'http://localhost:5000')
+
 # Stripe configuration
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', 'pk_test_default')
@@ -457,7 +467,7 @@ def create_checkout_session():
         db.close()
         
         # Redirect to payment processing page which will poll for completion
-        success_url = f'http://localhost:5000/payment-processing/{order_id}?token={order_token}'
+        success_url = f'{BASE_URL}/payment-processing/{order_id}?token={order_token}'
         print(f"Creating Stripe session with success_url: {success_url}")
 
         checkout_session = stripe.checkout.Session.create(
@@ -465,7 +475,7 @@ def create_checkout_session():
             line_items=line_items,
             mode='payment',
             success_url=success_url,
-            cancel_url='http://localhost:5000/products',
+            cancel_url=f'{BASE_URL}/products',
             client_reference_id=str(order_id),
             metadata={
                 'order_id': str(order_id),
@@ -770,6 +780,7 @@ def login():
         db.close()
         
         if user and check_password_hash(user['password_hash'], password):
+            session.permanent = True  # Make session persistent
             session['user_id'] = user['id']
             session['user_email'] = user['email']
             session['user_name'] = f"{user['first_name']} {user['last_name']}"
