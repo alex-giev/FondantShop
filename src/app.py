@@ -133,6 +133,21 @@ def home():
     product_list = load_products()
     return render_template('index.html', products=product_list)
 
+@app.route('/debug/stripe')
+def debug_stripe():
+    """Debug endpoint to check Stripe configuration"""
+    return jsonify({
+        'stripe_api_key_set': stripe.api_key is not None and stripe.api_key != '',
+        'stripe_api_key_length': len(stripe.api_key) if stripe.api_key else 0,
+        'stripe_api_key_prefix': stripe.api_key[:7] if stripe.api_key else 'None',
+        'stripe_publishable_key_set': STRIPE_PUBLISHABLE_KEY != 'pk_test_default',
+        'stripe_publishable_key_prefix': STRIPE_PUBLISHABLE_KEY[:7] if STRIPE_PUBLISHABLE_KEY else 'None',
+        'env_vars_raw': {
+            'STRIPE_SECRET_KEY_exists': os.getenv('STRIPE_SECRET_KEY') is not None,
+            'STRIPE_PUBLISHABLE_KEY_exists': os.getenv('STRIPE_PUBLISHABLE_KEY') is not None
+        }
+    })
+
 @app.route('/products')
 def products():
     product_list = load_products()
