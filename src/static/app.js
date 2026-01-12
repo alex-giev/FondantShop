@@ -26,6 +26,7 @@ class FondantShop {
         this.setupSmoothScroll();
         this.setupFormValidation();
         this.setupAnimations();
+        this.setupNavbarScroll();
     }
 
     // Slideshow Functionality
@@ -111,7 +112,7 @@ class FondantShop {
         }
     }
 
-    // Mobile Menu
+    // Mobile Menu - Optimized
     setupMobileMenu() {
         let toggle = document.querySelector('.mobile-menu-toggle');
         const navLinks = document.querySelector('.nav-links');
@@ -122,14 +123,66 @@ class FondantShop {
                 toggle = document.createElement('div');
                 toggle.className = 'mobile-menu-toggle';
                 toggle.innerHTML = '<span></span><span></span><span></span>';
+                toggle.setAttribute('aria-label', 'Toggle mobile menu');
+                toggle.setAttribute('role', 'button');
                 navbar.appendChild(toggle);
             }
         }
 
         if (toggle && navLinks) {
-            toggle.addEventListener('click', () => {
+            // Toggle menu on click
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
                 navLinks.classList.toggle('active');
                 toggle.classList.toggle('active');
+                
+                // Update aria attribute
+                const isExpanded = navLinks.classList.contains('active');
+                toggle.setAttribute('aria-expanded', isExpanded);
+                
+                // Prevent body scroll when menu is open on mobile
+                if (window.innerWidth <= 768) {
+                    document.body.style.overflow = isExpanded ? 'hidden' : '';
+                }
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!navLinks.contains(e.target) && !toggle.contains(e.target)) {
+                    if (navLinks.classList.contains('active')) {
+                        navLinks.classList.remove('active');
+                        toggle.classList.remove('active');
+                        toggle.setAttribute('aria-expanded', 'false');
+                        document.body.style.overflow = '';
+                    }
+                }
+            });
+
+            // Close menu when clicking on a link
+            const links = navLinks.querySelectorAll('.nav-link');
+            links.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        navLinks.classList.remove('active');
+                        toggle.classList.remove('active');
+                        toggle.setAttribute('aria-expanded', 'false');
+                        document.body.style.overflow = '';
+                    }
+                });
+            });
+
+            // Handle window resize
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    if (window.innerWidth > 768) {
+                        navLinks.classList.remove('active');
+                        toggle.classList.remove('active');
+                        toggle.setAttribute('aria-expanded', 'false');
+                        document.body.style.overflow = '';
+                    }
+                }, 250);
             });
         }
     }
@@ -271,6 +324,36 @@ class FondantShop {
         document.querySelectorAll('.product-card, .review-card, .faq-item').forEach(el => {
             observer.observe(el);
         });
+    }
+
+    // Navbar Scroll Optimization
+    setupNavbarScroll() {
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        let lastScrollTop = 0;
+        let scrollTimeout;
+        
+        const handleScroll = () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Add shadow when scrolled
+            if (scrollTop > 10) {
+                navbar.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            } else {
+                navbar.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+            }
+            
+            lastScrollTop = scrollTop;
+        };
+
+        // Throttle scroll events for performance
+        window.addEventListener('scroll', () => {
+            if (scrollTimeout) {
+                window.cancelAnimationFrame(scrollTimeout);
+            }
+            scrollTimeout = window.requestAnimationFrame(handleScroll);
+        }, { passive: true });
     }
 
     // Show Notification

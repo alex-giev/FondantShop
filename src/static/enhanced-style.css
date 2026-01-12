@@ -34,41 +34,56 @@ body {
     color: var(--dark-text);
     line-height: 1.6;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth Scrolling */
+/* Smooth Scrolling - Optimized */
 html {
     scroll-behavior: smooth;
 }
 
-/* Enhanced Navigation Bar */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Enhanced Navigation Bar - Optimized for Performance */
 .navbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 15px 40px;
-    background: rgba(255, 221, 225, 0.95);
-    backdrop-filter: blur(10px);
-    box-shadow: var(--shadow-md);
+    background: rgba(255, 221, 225, 0.98);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 0;
     z-index: 1000;
-    transition: all var(--transition-normal);
+    will-change: transform;
+    transition: box-shadow 0.2s ease;
 }
 
 .navbar:hover {
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .nav-logo img {
     width: 120px;
     height: auto;
-    transition: transform var(--transition-normal);
+    transition: transform 0.2s ease;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+    will-change: transform;
 }
 
 .nav-logo img:hover {
-    transform: scale(1.1) rotate(5deg);
+    transform: scale(1.05);
 }
 
 .nav-links {
@@ -84,7 +99,7 @@ html {
     font-weight: 700;
     text-decoration: none;
     position: relative;
-    transition: all var(--transition-normal);
+    transition: color 0.2s ease;
     padding: 5px 0;
 }
 
@@ -92,38 +107,47 @@ html {
     content: '';
     position: absolute;
     bottom: 0;
-    left: 50%;
+    left: 0;
     width: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--accent-pink), var(--hot-pink));
-    transition: all var(--transition-normal);
-    transform: translateX(-50%);
+    background: var(--accent-pink);
+    transition: width 0.25s ease;
     border-radius: 2px;
 }
 
 .nav-link:hover {
     color: var(--hot-pink);
-    transform: translateY(-2px);
 }
 
 .nav-link:hover::after {
     width: 100%;
 }
 
-/* Mobile Menu Toggle */
+/* Mobile Menu Toggle - Optimized */
 .mobile-menu-toggle {
     display: none;
     flex-direction: column;
     cursor: pointer;
-    gap: 5px;
+    gap: 6px;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    z-index: 1002;
+    transition: transform 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+    transform: scale(1.05);
 }
 
 .mobile-menu-toggle span {
-    width: 30px;
+    width: 28px;
     height: 3px;
     background: var(--dark-text);
-    border-radius: 2px;
-    transition: all var(--transition-normal);
+    border-radius: 3px;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transform-origin: center;
+    will-change: transform, opacity;
 }
 
 /* Enhanced Header with Glowing Text */
@@ -1166,41 +1190,24 @@ footer {
     color: var(--accent-pink);
 }
 
-/* Responsive Design */
-/* Mobile Menu Toggle Button */
-.mobile-menu-toggle {
-    display: none;
-    flex-direction: column;
-    cursor: pointer;
-    padding: 5px;
-    z-index: 1001;
-}
-
-.mobile-menu-toggle span {
-    width: 25px;
-    height: 3px;
-    background: var(--dark-text);
-    margin: 3px 0;
-    transition: all var(--transition-fast);
-    border-radius: 3px;
-}
-
+/* Responsive Design - Optimized Mobile Menu */
 .mobile-menu-toggle.active span:nth-child(1) {
-    transform: rotate(45deg) translate(6px, 6px);
+    transform: rotate(45deg) translate(9px, 9px);
 }
 
 .mobile-menu-toggle.active span:nth-child(2) {
     opacity: 0;
+    transform: translateX(-20px);
 }
 
 .mobile-menu-toggle.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -7px);
+    transform: rotate(-45deg) translate(9px, -9px);
 }
 
 /* Tablet and Mobile Styles */
 @media (max-width: 768px) {
     .navbar {
-        padding: 15px 20px;
+        padding: 12px 20px;
         flex-wrap: wrap;
     }
     
@@ -1209,7 +1216,6 @@ footer {
     }
     
     .nav-links {
-        display: none;
         flex-direction: column;
         width: 100%;
         gap: 0;
@@ -1218,25 +1224,40 @@ footer {
         left: 0;
         right: 0;
         background: rgba(255, 221, 225, 0.98);
-        backdrop-filter: blur(10px);
         padding: 0;
-        box-shadow: var(--shadow-lg);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         max-height: 0;
         overflow: hidden;
-        transition: max-height 0.3s ease-in-out;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.3s ease,
+                    transform 0.3s ease;
+        will-change: max-height, opacity, transform;
     }
     
     .nav-links.active {
-        display: flex;
         max-height: 600px;
+        opacity: 1;
+        transform: translateY(0);
     }
     
     .nav-link {
         width: 100%;
-        padding: 15px 20px;
-        border-bottom: 1px solid rgba(255, 105, 180, 0.2);
+        padding: 16px 24px;
+        border-bottom: 1px solid rgba(255, 105, 180, 0.15);
         text-align: left;
         font-size: 1.5em;
+        transition: background-color 0.2s ease, padding-left 0.2s ease;
+    }
+    
+    .nav-link:hover {
+        background-color: rgba(255, 105, 180, 0.1);
+        padding-left: 30px;
+    }
+    
+    .nav-link::after {
+        display: none;
     }
     
     /* Modern Home Page Mobile */
@@ -1401,8 +1422,27 @@ footer {
         font-size: 1.1em;
     }
     
+    .navbar {
+        padding: 10px 15px;
+    }
+    
     .nav-logo img {
         width: 100px;
+    }
+    
+    .mobile-menu-toggle {
+        gap: 5px;
+        padding: 6px;
+    }
+    
+    .mobile-menu-toggle span {
+        width: 24px;
+        height: 2.5px;
+    }
+    
+    .nav-link {
+        font-size: 1.3em;
+        padding: 14px 20px;
     }
     
     .product-grid {
