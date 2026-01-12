@@ -280,5 +280,13 @@
             });
         }
     </script>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    
+    <!-- Firebase Config & Auth -->
+    <script src="{{ url_for('static', filename='firebase-config.js') }}"></script>
+    <script src="{{ url_for('static', filename='firebase-auth.js') }}"></script>
 </body>
 </html>
