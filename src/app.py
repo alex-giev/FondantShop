@@ -77,8 +77,9 @@ def init_db():
     db.commit()
     db.close()
 
-# Initialize database on startup
-init_db()
+# Skip database initialization on Vercel (read-only filesystem)
+# Orders are tracked through Stripe dashboard
+# init_db()
 
 def login_required(f):
     """Decorator to require login for routes"""
@@ -452,28 +453,8 @@ def create_checkout_session():
             order_name = data['name']
             total_price = data['price']
         
-        # Create pending order in database first
-        db = get_db()
-        db.execute('''
-            INSERT INTO orders (user_id, product_name, product_price, stripe_session_id, status)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (
-            user_id,
-            order_name,
-            total_price,
-            'pending',  # Temporary placeholder
-            'pending'
-        ))
-        db.commit()
-        order_id = db.execute('SELECT last_insert_rowid()').fetchone()[0]
-        
-        # Generate a secure token for this order (simple hash of order_id + user_id + secret)
-        import hashlib
-        order_token = hashlib.sha256(f"{order_id}-{user_id}-{app.secret_key}".encode()).hexdigest()[:16]
-        db.close()
-        
-        # Redirect to payment processing page which will poll for completion
-        success_url = f'{BASE_URL}/payment-processing/{order_id}?token={order_token}'
+        # Direct redirect to success page (no database needed)
+        success_url = f'{BASE_URL}/order-success'
         print(f"Creating Stripe session with success_url: {success_url}")
 
         checkout_session = stripe.checkout.Session.create(
@@ -482,27 +463,13 @@ def create_checkout_session():
             mode='payment',
             success_url=success_url,
             cancel_url=f'{BASE_URL}/products',
-            client_reference_id=str(order_id),
             metadata={
-                'order_id': str(order_id),
-                'user_id': str(session['user_id'])
+                'user_id': user_id,
+                'user_email': user_email,
+                'user_name': user_name,
+                'order_name': order_name
             }
         )
-        
-        # Update order with Stripe session ID
-        db = get_db()
-        db.execute('''
-            UPDATE orders 
-            SET stripe_session_id = ?
-            WHERE id = ?
-        ''', (checkout_session.id, order_id))
-        db.commit()
-        db.close()
-        
-        # Clear cart if this was a cart checkout
-        if data.get('checkout_type') == 'cart':
-            session['cart'] = []
-            session.modified = True
         
         print(f"Checkout URL: {checkout_session.url}")
         return jsonify({
@@ -515,49 +482,8 @@ def create_checkout_session():
 
 @app.route('/order-success')
 def order_success():
-    """Handle successful payment and record order"""
-    print(f"Order success called with args: {request.args}")
-    session_id = request.args.get('session_id')
-    order_id = request.args.get('order_id')
-    
-    print(f"Session ID: {session_id}, Order ID: {order_id}")
-    
-    if not session_id or not order_id:
-        print("Missing session_id or order_id")
-        flash('Invalid order session', 'error')
-        return redirect(url_for('products'))
-    
-    try:
-        # Retrieve the Stripe session
-        checkout_session = stripe.checkout.Session.retrieve(session_id)
-        print(f"Stripe session payment status: {checkout_session.payment_status}")
-        
-        if checkout_session.payment_status == 'paid':
-            # Update order status to completed
-            db = get_db()
-            db.execute('''
-                UPDATE orders 
-                SET status = 'completed'
-                WHERE id = ? AND stripe_session_id = ?
-            ''', (order_id, session_id))
-            db.commit()
-            print(f"Order {order_id} marked as completed")
-            db.close()
-            
-            # Redirect to order details page
-            flash('Payment successful! Your order has been placed.', 'success')
-            return redirect(url_for('order_detail', order_id=order_id))
-        else:
-            print(f"Payment not completed: {checkout_session.payment_status}")
-            flash('Payment not completed. Please try again.', 'error')
-            return redirect(url_for('products'))
-            
-    except Exception as e:
-        print(f"Error processing order: {e}")
-        import traceback
-        traceback.print_exc()
-        flash('Error processing your order. Please contact support.', 'error')
-        return redirect(url_for('products'))
+    """Handle successful payment - simplified for serverless"""
+    return render_template('order_success.html')
 
 @app.route('/webhook', methods=['POST'])
 def webhook():

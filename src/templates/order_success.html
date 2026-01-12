@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Success - Fondant Toppers Booth</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='enhanced-style.css') }}">
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .success-icon {
+            font-size: 80px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .success-title {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .success-message {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-custom {
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #FF6B9D 0%, #C06C84 100%);
+            color: white;
+            border: none;
+        }
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.4);
+            color: white;
+        }
+        .btn-secondary-custom {
+            background: white;
+            color: #FF6B9D;
+            border: 2px solid #FF6B9D;
+        }
+        .btn-secondary-custom:hover {
+            background: #FF6B9D;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container-flex">
+            <a href="{{ url_for('home') }}" class="logo">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Fondant Toppers Booth">
+            </a>
+            
+            <div class="nav-links" id="navLinks">
+                <a href="{{ url_for('home') }}" class="nav-link">Home</a>
+                <a href="{{ url_for('products') }}" class="nav-link">Products</a>
+                <a href="{{ url_for('contact') }}" class="nav-link">Contact</a>
+                <a href="{{ url_for('reviews') }}" class="nav-link">Reviews</a>
+                <a href="{{ url_for('qa') }}" class="nav-link">Q & A</a>
+                <a href="{{ url_for('view_cart') }}" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i> Cart 
+                    <span class="badge bg-danger rounded-pill" id="cart-badge" style="font-size: 0.7em;">0</span>
+                </a>
+                <!-- Auth links controlled by Firebase - initially hidden to prevent flash -->
+                <a href="/account" class="nav-link" style="display: none;"><i class="fas fa-user"></i> Account</a>
+                <a href="/logout" class="nav-link logout-btn" style="display: none;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                <a href="/login" class="nav-link" style="display: none;"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="/register" class="nav-link" style="display: none;"><i class="fas fa-user-plus"></i> Register</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Success Message -->
+    <div class="success-container">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h1 class="success-title">Payment Successful!</h1>
+        <p class="success-message">
+            Thank you for your order! Your payment has been processed successfully.
+            <br><br>
+            You will receive an order confirmation email shortly with all the details.
+            <br><br>
+            We'll start working on your custom fondant toppers right away!
+        </p>
+        <div class="action-buttons">
+            <a href="{{ url_for('products') }}" class="btn-custom btn-primary-custom">
+                <i class="fas fa-shopping-bag"></i> Continue Shopping
+            </a>
+            <a href="{{ url_for('home') }}" class="btn-custom btn-secondary-custom">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="{{ url_for('static', filename='firebase-config.js') }}"></script>
+    <script src="{{ url_for('static', filename='firebase-auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='firebase-nav.js') }}"></script>
+    <script src="{{ url_for('static', filename='firebase-cart.js') }}"></script>
+
+    <script>
+        // Clear cart after successful purchase
+        if (window.firebaseCart) {
+            window.firebaseCart.clearCart();
+        }
+        
+        // Update cart count
+        if (window.firebaseCart) {
+            const cartCount = window.firebaseCart.getCartCount();
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+                badge.textContent = cartCount;
+                badge.style.display = cartCount > 0 ? 'inline-block' : 'none';
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
