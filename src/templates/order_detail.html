@@ -171,13 +171,11 @@
             <a href="{{ url_for('contact') }}" class="nav-link">Contact</a>
             <a href="{{ url_for('reviews') }}" class="nav-link">Reviews</a>
             <a href="{{ url_for('qa') }}" class="nav-link">Q & A</a>
-            {% if session.get('user_id') %}
-                <a href="{{ url_for('account') }}" class="nav-link"><i class="fas fa-user"></i> Account</a>
-                <a href="{{ url_for('logout') }}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            {% else %}
-                <a href="{{ url_for('login') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
-                <a href="{{ url_for('register') }}" class="nav-link"><i class="fas fa-user-plus"></i> Register</a>
-            {% endif %}
+            <!-- Auth links controlled by Firebase - initially hidden to prevent flash -->
+            <a href="/account" class="nav-link" style="display: none;"><i class="fas fa-user"></i> Account</a>
+            <a href="/logout" class="nav-link logout-btn" style="display: none;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <a href="/login" class="nav-link" style="display: none;"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="/register" class="nav-link" style="display: none;"><i class="fas fa-user-plus"></i> Register</a>
         </div>
     </nav>
 

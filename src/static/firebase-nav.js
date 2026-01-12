@@ -22,94 +22,52 @@
             const navLinks = document.querySelector('.nav-links');
             if (!navLinks) return;
 
-            // Remove existing auth-related links
-            const existingAuthLinks = navLinks.querySelectorAll('.auth-link');
-            existingAuthLinks.forEach(link => link.remove());
+            // Get references to existing links
+            const accountLink = navLinks.querySelector('a[href*="account"]');
+            const logoutLink = navLinks.querySelector('.logout-btn, a[href*="logout"]');
+            const loginLink = navLinks.querySelector('a[href*="login"]');
+            const registerLink = navLinks.querySelector('a[href*="register"]');
 
             if (user) {
-                // User is logged in
-                // Remove login/register links if they exist
-                const loginLink = navLinks.querySelector('a[href*="login"]');
-                const registerLink = navLinks.querySelector('a[href*="register"]');
+                // User is logged in - show account and logout, hide login and register
+                if (accountLink) {
+                    accountLink.innerHTML = '<i class="fas fa-user"></i> ' + (user.displayName || 'Account');
+                    accountLink.style.display = 'inline-block';
+                }
+                if (logoutLink) {
+                    logoutLink.style.display = 'inline-block';
+                }
                 if (loginLink) loginLink.style.display = 'none';
                 if (registerLink) registerLink.style.display = 'none';
 
-                // Add account link if it doesn't exist
-                let accountLink = navLinks.querySelector('a[href*="account"]');
-                if (!accountLink) {
-                    accountLink = document.createElement('a');
-                    accountLink.href = '/account';
-                    accountLink.className = 'nav-link auth-link';
-                    navLinks.appendChild(accountLink);
-                }
-                accountLink.innerHTML = '<i class="fas fa-user"></i> ' + (user.displayName || 'Account');
-                accountLink.style.display = 'inline-block';
-
-                // Add logout button if it doesn't exist
-                let logoutLink = navLinks.querySelector('.logout-btn, a[href*="logout"]');
-                if (!logoutLink) {
-                    logoutLink = document.createElement('button');
-                    logoutLink.className = 'nav-link auth-link logout-btn';
-                    logoutLink.style.background = 'none';
-                    logoutLink.style.border = 'none';
-                    logoutLink.style.color = 'inherit';
-                    logoutLink.style.cursor = 'pointer';
-                    logoutLink.style.fontFamily = 'inherit';
-                    logoutLink.style.fontSize = 'inherit';
-                    logoutLink.style.padding = 'inherit';
-                    navLinks.appendChild(logoutLink);
-                }
-                logoutLink.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
-                logoutLink.style.display = 'inline-block';
-
-                // Add logout event listener
-                logoutLink.onclick = async (e) => {
-                    e.preventDefault();
-                    try {
-                        const result = await authFunctions.logoutUser();
-                        if (result.success) {
-                            showNotification('Logged out successfully!', 'success');
-                            setTimeout(() => {
-                                window.location.href = '/';
-                            }, 500);
+                // Add logout event listener if not already added
+                if (logoutLink && !logoutLink.hasAttribute('data-logout-handler')) {
+                    logoutLink.setAttribute('data-logout-handler', 'true');
+                    logoutLink.onclick = async (e) => {
+                        e.preventDefault();
+                        try {
+                            const result = await authFunctions.logoutUser();
+                            if (result.success) {
+                                showNotification('Logged out successfully!', 'success');
+                                setTimeout(() => {
+                                    window.location.href = '/';
+                                }, 500);
+                            }
+                        } catch (error) {
+                            console.error('Logout error:', error);
+                            showNotification('Logout failed. Please try again.', 'error');
                         }
-                    } catch (error) {
-                        console.error('Logout error:', error);
-                        showNotification('Logout failed. Please try again.', 'error');
-                    }
-                };
+                    };
+                }
 
                 // Update cart count with user context
                 updateCartCount();
             } else {
-                // User is not logged in
-                // Hide account and logout links
-                const accountLink = navLinks.querySelector('a[href*="account"]');
-                const logoutLink = navLinks.querySelector('.logout-btn, a[href*="logout"]');
+                // User is not logged in - hide account and logout, show login and register
                 if (accountLink) accountLink.style.display = 'none';
                 if (logoutLink) logoutLink.style.display = 'none';
-
-                // Show login and register links
-                let loginLink = navLinks.querySelector('a[href*="login"]');
-                let registerLink = navLinks.querySelector('a[href*="register"]');
-                
-                if (!loginLink) {
-                    loginLink = document.createElement('a');
-                    loginLink.href = '/login';
-                    loginLink.className = 'nav-link auth-link';
-                    loginLink.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-                    navLinks.appendChild(loginLink);
-                }
-                loginLink.style.display = 'inline-block';
-
-                if (!registerLink) {
-                    registerLink = document.createElement('a');
-                    registerLink.href = '/register';
-                    registerLink.className = 'nav-link auth-link';
-                    registerLink.innerHTML = '<i class="fas fa-user-plus"></i> Register';
-                    navLinks.appendChild(registerLink);
-                }
-                registerLink.style.display = 'inline-block';
+                if (loginLink) loginLink.style.display = 'inline-block';
+                if (registerLink) registerLink.style.display = 'inline-block';
             }
         }
 
