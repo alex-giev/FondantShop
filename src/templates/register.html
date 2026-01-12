@@ -61,24 +61,12 @@
                         <p style="color: #5A5A5A;">Create an account to track orders and save your information</p>
                     </div>
                     
-                    <form method="POST" action="{{ url_for('register') }}">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="first_name">
-                                        <i class="fas fa-user"></i> First Name
-                                    </label>
-                                    <input type="text" id="first_name" name="first_name" class="form-control" required placeholder="First name">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="last_name">
-                                        <i class="fas fa-user"></i> Last Name
-                                    </label>
-                                    <input type="text" id="last_name" name="last_name" class="form-control" required placeholder="Last name">
-                                </div>
-                            </div>
+                    <form id="register-form">
+                        <div class="form-group">
+                            <label for="name">
+                                <i class="fas fa-user"></i> Full Name
+                            </label>
+                            <input type="text" id="name" name="name" class="form-control" required placeholder="Your full name">
                         </div>
 
                         <div class="form-group">
@@ -103,7 +91,7 @@
                             <input type="password" id="confirm_password" name="confirm_password" class="form-control" required placeholder="Re-enter your password">
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 btn-lg">
+                        <button type="submit" class="btn btn-primary w-100 btn-lg" id="register-btn">
                             <i class="fas fa-user-plus"></i> Create Account
                         </button>
                     </form>
@@ -139,21 +127,103 @@
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Custom JavaScript -->
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     
-    <!-- Password Match Validation -->
+    <!-- Firebase Config & Auth -->
+    <script src="{{ url_for('static', filename='firebase-config.js') }}"></script>
+    <script src="{{ url_for('static', filename='firebase-auth.js') }}"></script>
+    
+    <!-- Registration Handler -->
     <script>
-        const password = document.getElementById('password');
-        const confirmPassword = document.getElementById('confirm_password');
-        
-        confirmPassword.addEventListener('input', function() {
-            if (password.value !== confirmPassword.value) {
-                confirmPassword.setCustomValidity('Passwords do not match');
-            } else {
-                confirmPassword.setCustomValidity('');
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerForm = document.getElementById('register-form');
+            const registerBtn = document.getElementById('register-btn');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm_password');
+            
+            // Check if already logged in
+            window.firebaseAuthFunctions.onAuthStateChanged((user) => {
+                if (user) {
+                    window.location.href = '/account';
+                }
+            });
+            
+            // Password match validation
+            confirmPassword.addEventListener('input', function() {
+                if (password.value !== confirmPassword.value) {
+                    confirmPassword.setCustomValidity('Passwords do not match');
+                    confirmPassword.style.borderColor = '#dc3545';
+                } else {
+                    confirmPassword.setCustomValidity('');
+                    confirmPassword.style.borderColor = '#28a745';
+                }
+            });
+            
+            // Handle registration
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const passwordValue = password.value;
+                const confirmPasswordValue = confirmPassword.value;
+                
+                // Validate passwords match
+                if (passwordValue !== confirmPasswordValue) {
+                    showNotification('Passwords do not match!', 'danger');
+                    return;
+                }
+                
+                registerBtn.disabled = true;
+                registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+                
+                try {
+                    const result = await window.firebaseAuthFunctions.registerUser(email, passwordValue, name);
+                    
+                    if (result.success) {
+                        showNotification('Account created! Please check your email for verification link.', 'success');
+                        setTimeout(() => {
+                            window.location.href = '/account';
+                        }, 2000);
+                    } else {
+                        showNotification(result.error || 'Registration failed. Please try again.', 'danger');
+                        registerBtn.disabled = false;
+                        registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+                    }
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    showNotification('An error occurred. Please try again.', 'danger');
+                    registerBtn.disabled = false;
+                    registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+                }
+            });
+            
+            function showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.className = `alert alert-${type} alert-dismissible fade show`;
+                notification.style.position = 'fixed';
+                notification.style.top = '20px';
+                notification.style.right = '20px';
+                notification.style.zIndex = '10000';
+                notification.style.minWidth = '300px';
+                notification.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
             }
         });
     </script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
