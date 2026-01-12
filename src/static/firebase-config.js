@@ -13,11 +13,25 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase (using global firebase from CDN)
-const app = firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+try {
+  const app = firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
 
-// Export for use in other files
-window.firebaseAuth = auth;
-window.firebaseApp = app;
+  // Export for use in other files
+  window.firebaseAuth = auth;
+  window.firebaseApp = app;
 
-console.log('Firebase initialized successfully!');
+  console.log('Firebase initialized successfully!');
+  console.log('Auth Domain:', firebaseConfig.authDomain);
+  console.log('Project ID:', firebaseConfig.projectId);
+  
+  // Test auth availability
+  auth.onAuthStateChanged((user) => {
+    console.log('Auth state changed. User:', user ? user.email : 'No user');
+  }, (error) => {
+    console.error('Auth state error:', error);
+  });
+} catch (error) {
+  console.error('Firebase initialization error:', error);
+  alert('Firebase Error: ' + error.message + '\n\nPlease check:\n1. Email/Password authentication is enabled in Firebase Console\n2. localhost is added to authorized domains');
+}
