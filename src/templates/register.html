@@ -143,13 +143,6 @@
             const password = document.getElementById('password');
             const confirmPassword = document.getElementById('confirm_password');
             
-            // Check if already logged in
-            window.firebaseAuthFunctions.onAuthStateChanged((user) => {
-                if (user) {
-                    window.location.href = '/account';
-                }
-            });
-            
             // Password match validation
             confirmPassword.addEventListener('input', function() {
                 if (password.value !== confirmPassword.value) {

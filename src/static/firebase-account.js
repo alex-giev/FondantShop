@@ -13,25 +13,24 @@
         const auth = window.firebaseAuth;
         const authFunctions = window.firebaseAuthFunctions;
 
-        // Check authentication state with a small delay to allow Firebase to restore session
-        let hasCheckedAuth = false;
+        // Check authentication state
         authFunctions.onAuthStateChanged((user) => {
             if (user) {
                 // User is logged in
-                hasCheckedAuth = true;
                 displayUserInfo(user);
                 updateNavigation(true, user);
-            } else if (hasCheckedAuth) {
-                // Only redirect if we've already checked once (prevents redirect during initial load)
-                window.location.href = '/';
             } else {
-                // First check - wait a moment for Firebase to restore auth state
-                hasCheckedAuth = true;
+                // User is not logged in, redirect to home after a brief delay
+                // to allow for auth state restoration
                 setTimeout(() => {
-                    if (!auth.currentUser) {
+                    const currentUser = auth.currentUser;
+                    if (!currentUser) {
                         window.location.href = '/';
+                    } else {
+                        displayUserInfo(currentUser);
+                        updateNavigation(true, currentUser);
                     }
-                }, 300);
+                }, 1000);
             }
         });
 

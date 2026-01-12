@@ -153,9 +153,10 @@
                     
                     if (result.success) {
                         showNotification('Login successful! Redirecting...', 'success');
+                        // Wait a bit longer for Firebase to fully register the auth state
                         setTimeout(() => {
                             window.location.href = '/account';
-                        }, 1000);
+                        }, 1500);
                     } else {
                         showNotification(result.error || 'Login failed. Please check your credentials.', 'danger');
                         loginBtn.disabled = false;
