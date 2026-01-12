@@ -1,5 +1,10 @@
 # Environment variables
 .env
+.env.*
+.env.local
+.env.production
+.env.vercel
+!.env.example
 
 # Python
 __pycache__/
