@@ -393,11 +393,17 @@ def cart_count():
 
 @app.route('/create-checkout-session', methods=['POST'])
 def create_checkout_session():
-    # Check if user is logged in
-    if 'user_id' not in session:
+    data = request.get_json()
+    
+    # Check if Firebase user data is provided
+    firebase_user = data.get('firebase_user')
+    if not firebase_user or not firebase_user.get('uid'):
         return jsonify({'error': 'login_required', 'message': 'Please login or create an account to complete your purchase'}), 401
     
-    data = request.get_json()
+    # Use Firebase UID as user identifier
+    user_id = firebase_user['uid']
+    user_email = firebase_user.get('email', 'unknown@email.com')
+    user_name = firebase_user.get('displayName', 'Customer')
     try:
         # Check if this is a cart checkout or single product
         if data.get('checkout_type') == 'cart':
@@ -452,7 +458,7 @@ def create_checkout_session():
             INSERT INTO orders (user_id, product_name, product_price, stripe_session_id, status)
             VALUES (?, ?, ?, ?, ?)
         ''', (
-            session['user_id'],
+            user_id,
             order_name,
             total_price,
             'pending',  # Temporary placeholder
@@ -463,7 +469,7 @@ def create_checkout_session():
         
         # Generate a secure token for this order (simple hash of order_id + user_id + secret)
         import hashlib
-        order_token = hashlib.sha256(f"{order_id}-{session['user_id']}-{app.secret_key}".encode()).hexdigest()[:16]
+        order_token = hashlib.sha256(f"{order_id}-{user_id}-{app.secret_key}".encode()).hexdigest()[:16]
         db.close()
         
         # Redirect to payment processing page which will poll for completion

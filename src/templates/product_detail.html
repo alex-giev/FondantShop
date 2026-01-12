@@ -520,6 +520,18 @@
             const productName = this.getAttribute('data-name') + ' (Qty: ' + quantity + ')';
             const productPrice = parseFloat(this.getAttribute('data-price')) * quantity;
             
+            // Check if user is logged in with Firebase
+            const user = window.firebaseAuth?.currentUser;
+            if (!user) {
+                const loginPrompt = confirm('Please login or create an account to complete your purchase.\\n\\nClick OK to login, or Cancel to create an account.');
+                if (loginPrompt) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                } else {
+                    window.location.href = '/register?redirect=' + encodeURIComponent(window.location.pathname);
+                }
+                return;
+            }
+            
             // Disable button and show loading
             this.disabled = true;
             this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
@@ -532,7 +544,12 @@
                     },
                     body: JSON.stringify({ 
                         name: productName, 
-                        price: productPrice.toFixed(2)
+                        price: productPrice.toFixed(2),
+                        firebase_user: {
+                            uid: user.uid,
+                            email: user.email,
+                            displayName: user.displayName || user.email
+                        }
                     }),
                 });
                 

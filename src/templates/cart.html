@@ -486,10 +486,31 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             
             try {
+                // Get current Firebase user
+                const user = window.firebaseAuth?.currentUser;
+                if (!user) {
+                    const loginPrompt = confirm('Please login or create an account to complete your purchase.\n\nClick OK to login, or Cancel to create an account.');
+                    if (loginPrompt) {
+                        window.location.href = '/login?redirect=/cart';
+                    } else {
+                        window.location.href = '/register?redirect=/cart';
+                    }
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-lock"></i> Secure Checkout';
+                    return;
+                }
+
                 const response = await fetch('/create-checkout-session', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ checkout_type: 'cart' })
+                    body: JSON.stringify({ 
+                        checkout_type: 'cart',
+                        firebase_user: {
+                            uid: user.uid,
+                            email: user.email,
+                            displayName: user.displayName || user.email
+                        }
+                    })
                 });
                 
                 if (response.status === 401) {
