@@ -368,6 +368,7 @@
     <script src="{{ url_for('static', filename='firebase-config.js') }}"></script>
     <script src="{{ url_for('static', filename='firebase-auth.js') }}"></script>
     <script src="{{ url_for('static', filename='firebase-cart.js') }}"></script>
+    <script src="{{ url_for('static', filename='firebase-orders.js') }}"></script>
     <script src="{{ url_for('static', filename='firebase-nav.js') }}"></script>
 
     <!-- Bootstrap JS Bundle with Popper -->
@@ -511,6 +512,29 @@
                     return;
                 }
 
+                // Get cart data and save to sessionStorage for order history
+                const cart = window.firebaseCart?.getCart() || [];
+                const total = window.firebaseCart?.getCartTotal() || 0;
+                
+                // Prepare order data
+                const orderData = {
+                    orderId: `ORD-${Date.now()}`,
+                    sessionId: null, // Will be set by Stripe
+                    items: cart.map(item => ({
+                        productId: item.productId,
+                        name: item.productName,
+                        price: item.productPrice,
+                        quantity: item.quantity,
+                        image: item.productImage,
+                        variant: item.variant || ''
+                    })),
+                    total: total
+                };
+                
+                // Save to sessionStorage (will be moved to localStorage after successful payment)
+                sessionStorage.setItem('pending_order', JSON.stringify(orderData));
+                console.log('Order data saved to sessionStorage:', orderData);
+
                 const response = await fetch('/create-checkout-session', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -542,6 +566,11 @@
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-lock"></i> Secure Checkout';
                 } else {
+                    // Save session ID to order data
+                    orderData.sessionId = session.id;
+                    sessionStorage.setItem('pending_order', JSON.stringify(orderData));
+                    
+                    // Redirect to Stripe checkout
                     window.location.href = session.url;
                 }
             } catch (error) {

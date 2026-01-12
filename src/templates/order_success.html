@@ -130,22 +130,73 @@
     <script src="{{ url_for('static', filename='firebase-auth.js') }}"></script>
     <script src="{{ url_for('static', filename='firebase-nav.js') }}"></script>
     <script src="{{ url_for('static', filename='firebase-cart.js') }}"></script>
+    <script src="{{ url_for('static', filename='firebase-orders.js') }}"></script>
 
     <script>
-        // Clear cart after successful purchase
-        if (window.firebaseCart) {
-            window.firebaseCart.clearCart();
-        }
-        
-        // Update cart count
-        if (window.firebaseCart) {
-            const cartCount = window.firebaseCart.getCartCount();
-            const badge = document.getElementById('cart-badge');
-            if (badge) {
-                badge.textContent = cartCount;
-                badge.style.display = cartCount > 0 ? 'inline-block' : 'none';
+        // Save order and clear cart after successful purchase
+        (function() {
+            // Wait for Firebase to initialize
+            const initOrderSuccess = () => {
+                const user = window.firebaseAuth?.currentUser;
+                
+                if (!user) {
+                    // Wait for auth to initialize
+                    console.log('Waiting for Firebase auth...');
+                    setTimeout(initOrderSuccess, 500);
+                    return;
+                }
+
+                console.log('Processing order success for user:', user.email);
+
+                // Get order data from sessionStorage (saved during checkout)
+                const orderDataStr = sessionStorage.getItem('pending_order');
+                
+                if (orderDataStr) {
+                    try {
+                        const orderData = JSON.parse(orderDataStr);
+                        console.log('Saving order to history:', orderData);
+                        
+                        // Save order to localStorage
+                        const result = window.firebaseOrders.saveOrder(orderData);
+                        
+                        if (result.success) {
+                            console.log('Order saved successfully:', result.order.id);
+                            // Clear the pending order
+                            sessionStorage.removeItem('pending_order');
+                        } else {
+                            console.error('Failed to save order:', result.error);
+                        }
+                    } catch (error) {
+                        console.error('Error parsing order data:', error);
+                    }
+                } else {
+                    console.log('No pending order data found in sessionStorage');
+                }
+
+                // Clear cart after successful purchase
+                if (window.firebaseCart) {
+                    window.firebaseCart.clearCart();
+                    console.log('Cart cleared');
+                }
+                
+                // Update cart count
+                if (window.firebaseCart) {
+                    const cartCount = window.firebaseCart.getCartCount();
+                    const badge = document.getElementById('cart-badge');
+                    if (badge) {
+                        badge.textContent = cartCount;
+                        badge.style.display = cartCount > 0 ? 'inline-block' : 'none';
+                    }
+                }
+            };
+
+            // Start the initialization
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initOrderSuccess);
+            } else {
+                initOrderSuccess();
             }
-        }
+        })();
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
