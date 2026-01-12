@@ -28,9 +28,18 @@ app.config['SESSION_COOKIE_NAME'] = 'fondant_session'  # Custom session cookie n
 # Base URL configuration (change to your domain in production)
 BASE_URL = os.getenv('BASE_URL', 'http://localhost:5000')
 
-# Stripe configuration
-stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
-STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', 'pk_test_default')
+# Stripe configuration - strip quotes if present
+stripe_secret = os.getenv('STRIPE_SECRET_KEY', '')
+if stripe_secret:
+    # Remove surrounding quotes if present (from .env files)
+    stripe_secret = stripe_secret.strip().strip("'").strip('"')
+stripe.api_key = stripe_secret if stripe_secret else None
+
+stripe_pub_key = os.getenv('STRIPE_PUBLISHABLE_KEY', 'pk_test_default')
+if stripe_pub_key and stripe_pub_key != 'pk_test_default':
+    stripe_pub_key = stripe_pub_key.strip().strip("'").strip('"')
+STRIPE_PUBLISHABLE_KEY = stripe_pub_key
+
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')  # Optional for local testing
 
 # Debug: Print to verify keys are loaded
