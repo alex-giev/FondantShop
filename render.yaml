@@ -3,7 +3,7 @@ services:
     name: fondant-shop
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --chdir src app:app
+    startCommand: cd src && gunicorn --bind 0.0.0.0:$PORT app:app
     envVars:
       - key: FLASK_SECRET_KEY
         generateValue: true
